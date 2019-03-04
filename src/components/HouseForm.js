@@ -1,8 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Button, Modal, Form } from 'react-bootstrap';
-import { Map, Marker, GoogleApiWrapper } from 'google-maps-react';
-import isEmpty from 'lodash/isEmpty';
+import MapHouseForm from './MapHouseForm';
 
 const initialState = {
   show: false,
@@ -43,11 +42,16 @@ class HouseForm extends React.Component {
     e.preventDefault();
     const form = e.currentTarget;
     if (form.checkValidity()) {
-      this.props.addHouse(this.state.house);
+      const fn = this.state.house._id ? this.props.saveHouse : this.props.addHouse;
+      fn(this.state.house);
       this.setState(initialState);
     } else {
       this.setState({ validated: true });
     }
+  }
+
+  handleOpen = (house) => {
+    this.setState({ show: true, house });
   }
 
   onMapClick = (a, b, c) => {
@@ -68,7 +72,7 @@ class HouseForm extends React.Component {
         <Modal show={this.state.show} onHide={this.handleClose} size="lg">
           <Form noValidate validated={this.state.validated} onSubmit={this.handleSubmit}>
             <Modal.Header closeButton>
-              <Modal.Title>New House</Modal.Title>
+              <Modal.Title>House Form</Modal.Title>
             </Modal.Header>
             <Modal.Body>
 
@@ -134,14 +138,7 @@ class HouseForm extends React.Component {
 
               <Form.Group className="position-relative" style={{height: '383px'}}>
                 <Form.Label>Location</Form.Label>
-                <Map
-                  google={this.props.google}
-                  zoom={14}
-                  style={{ width: '100%', height: '100%' }}
-                  onClick={this.onMapClick}
-                >
-                  {!isEmpty(this.state.house.position) && <Marker position={{ lat: this.state.house.position.lat, lng: this.state.house.position.lng }} />}
-                </Map>
+                <MapHouseForm house={this.state.house} onMapClick={this.onMapClick}/>
               </Form.Group>
 
             </Modal.Body>
@@ -160,7 +157,4 @@ class HouseForm extends React.Component {
   }
 }
 
-export default GoogleApiWrapper({
-  apiKey: ("AIzaSyDn5jFd9F1zSo3XhhCD5r5bf3AQnpph5kI")
-})(HouseForm)
-//export default HouseForm;
+export default HouseForm;
