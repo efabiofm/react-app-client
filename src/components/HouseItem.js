@@ -7,7 +7,7 @@ const HouseItem = (props) => {
   return (
     <Card>
       <Card.Body>
-        <Card.Title>{props.value.title}</Card.Title>
+        <Card.Title id={props.value._id}>{props.value.title}</Card.Title>
         <Card.Subtitle className="mb-2 text-muted">{props.value.location}</Card.Subtitle>
         <Card.Text>{props.value.description}</Card.Text>
         <Card.Text>{formatPrice(props.value.price)}</Card.Text>

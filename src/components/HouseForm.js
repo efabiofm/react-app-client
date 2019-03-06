@@ -65,7 +65,7 @@ class HouseForm extends React.Component {
   render() {
     return (
       <>
-        <Button variant="primary" onClick={this.handleShow}>
+        <Button id="btn-modal-opener" variant="primary" onClick={this.handleShow}>
           + Add new
         </Button>
 
