@@ -1,5 +1,9 @@
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+## Description
+
+A basic react application for practice purposes. It has two modules, one is the real-estate module where you can add houses with basic information such as size, price, description, etc and the geographic location point using google maps api and the other one is the global map module where users can see in the map all the makers where there are houses on sale/rent and click on the markers to popup its information.
+
 ## Available Scripts
 
 In the project directory, you can run:
