@@ -1,56 +1,23 @@
 import React from 'react';
-import cloneDeep from 'lodash/cloneDeep';
-import reject from 'lodash/reject';
-import findIndex from 'lodash/findIndex';
 import swal from 'sweetalert2';
+import { connect } from 'react-redux';
 import HouseForm from './HouseForm';
 import HouseItem from './HouseItem';
-import { postHouse, getHouses, putHouse, deleteHouse } from '../api/house.api';
+import { deleteHouseDB, postHouseDB, putHouseDB } from '../actions/actionCreators';
 
-class HouseList extends React.Component {
+export class HouseList extends React.Component {
   houseFormRef = React.createRef();
 
-  state = {
-    houses: [],
-  };
+  addHouse = (house) => this.props.dispatch(postHouseDB(house));
+  saveHouse = (house) => this.props.dispatch(putHouseDB(house));
+  editHouse = (item) => this.houseFormRef.current.handleOpen(item);
 
-  addHouse = (house) => {
-    return postHouse(house).then((resp) => {
-      const houses = cloneDeep(this.state.houses);
-      house._id = resp._id;
-      houses.push(house);
-      this.setState({ houses });
-    });
-  }
-
-  saveHouse = (house) => {
-    return putHouse(house).then((resp) => {
-      const houses = cloneDeep(this.state.houses);
-      const i = findIndex(houses, { _id: house._id });
-      houses[i] = house;
-      this.setState({ houses });
-    });
-  }
-
-  deleteHouse = (_id) => {
+  deleteHouse = (id) => {
     swal.fire({
       text: 'Are you sure you want to delete this item?',
       type: 'warning',
       showCancelButton: true
-    }).then((resp) => {
-      if (resp && !resp.dismiss) {
-        return deleteHouse(_id).then(() => {
-          let houses = cloneDeep(this.state.houses);
-          houses = reject(houses, { _id });
-          this.setState({ houses });
-        });
-      }
-      return false;
-    })
-  }
-
-  editHouse = (item) => {
-    this.houseFormRef.current.handleOpen(item);
+    }).then(resp => resp && !resp.dismiss && this.props.dispatch(deleteHouseDB(id)))
   }
 
   renderHouseItem = (value) => {
@@ -64,14 +31,7 @@ class HouseList extends React.Component {
     );
   }
 
-  componentDidMount() {
-    return getHouses().then((houses) => {
-      this.setState({ houses });
-    });
-  }
-
   render() {
-    const showList = this.state.houses.length > 0;
     return (
       <div className="container">
         <h1 className="text-uppercase">Real Estate List</h1>
@@ -84,17 +44,34 @@ class HouseList extends React.Component {
             />
         </div>
         <div className="mt-3">
-          {showList ? (
-            <ul className="list-unstyled">{this.state.houses.map(this.renderHouseItem)}</ul>
-          ) : (
-            <div className="no-entries">
-              <h3 className="text-muted">No entries :(</h3>
-            </div>
-          )}
+          {
+            this.props.houses && (
+              this.props.sendingRequest ? (
+                <div className="no-entries">
+                  <h3 className="text-muted">Loading...</h3>
+                </div>
+              ) : (
+                this.props.houses.length > 0 ? (
+                  <ul className="list-unstyled">{this.props.houses.map(this.renderHouseItem)}</ul>
+                ) : (
+                  <div className="no-entries">
+                    <h3 className="text-muted">No entries!</h3>
+                  </div>
+                )
+              )
+            )
+          }
         </div>
       </div>
     );
   }
 }
 
-export default HouseList;
+function mapStateToProps(state) {
+  return {
+    houses: state.houses,
+    sendingRequest: state.sendingRequest
+  };
+}
+
+export default connect(mapStateToProps)(HouseList);

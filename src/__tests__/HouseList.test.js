@@ -1,12 +1,13 @@
 import React from 'react';
-import mockAxios from 'axios'; // overrides the actual axios with the mock inside __mocks__
-import { shallow } from 'enzyme';
-import HouseList from '../components/HouseList';
+import configureStore from 'redux-mock-store'
+import { mount } from 'enzyme';
+import { Provider } from 'react-redux';
+import ConnectedHouseList, { HouseList } from '../components/HouseList';
 import HouseItem from '../components/HouseItem';
 
 it('tests api call', async () => {
-  const mockResponse = Promise.resolve({
-    data: [
+  const initialState = {
+    houses: [
       {
         _id: 'id',
         title: 'test',
@@ -16,22 +17,11 @@ it('tests api call', async () => {
         size: 0
       }
     ]
-  });
-  mockAxios.get.mockResolvedValue(mockResponse); // overrides respose with one specific for this test
-  const list = shallow(<HouseList/>);
-  const instance = list.instance();
-  await instance.componentDidMount();
-  expect(list.state().houses).toEqual([
-    {
-      _id: 'id',
-      title: 'test',
-      location: 'test',
-      type: 'test',
-      price: 0,
-      size: 0
-    }
-  ]);
-  // gets child component and checks if user can see the text
-  const item = list.find(HouseItem).dive().find('#id');
-  expect(item.text()).toEqual('test');
+  };
+  const mockStore = configureStore();
+  const store = mockStore(initialState);
+  const wrapper = mount(<Provider store={store}><ConnectedHouseList/></Provider>);
+  expect(wrapper.find(ConnectedHouseList).length).toEqual(1); // mounted correctly
+  expect(wrapper.find(HouseList).prop('houses')).toEqual(initialState.houses); // props passed correctly
+  expect(wrapper.find(HouseItem).find('.h5').text()).toEqual('test'); // items rendered correctly
 });
